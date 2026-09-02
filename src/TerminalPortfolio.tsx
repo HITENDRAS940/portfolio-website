@@ -7,6 +7,7 @@ import {
   useRef,
   useState,
 } from 'react';
+import { profiles, projects, skillGroups } from './portfolio-data';
 
 const commands = [
   'home',
@@ -17,6 +18,7 @@ const commands = [
   'resume',
   'socials',
   'contact',
+  'ask',
   'help',
   'clear',
 ] as const;
@@ -32,6 +34,8 @@ const greetings = [
   'こんにちは',
 ] as const;
 
+const maxAskQuestionLength = 500;
+
 const aliases: Record<string, Command> = {
   whoami: 'about',
   work: 'projects',
@@ -43,59 +47,6 @@ const aliases: Record<string, Command> = {
   cls: 'clear',
   ls: 'help',
 };
-
-const projects = [
-  {
-    name: 'Hyper',
-    role: 'Sports booking / Mobile',
-    year: '2025',
-    description:
-      'A production sports-booking application published on Google Play and the App Store, with concurrency-safe slot booking, Razorpay payments, dynamic pricing, settlements, and failure-safe booking states.',
-    stack: 'Expo, Spring Boot, PostgreSQL, Docker',
-    links: [
-      ['github', 'https://github.com/HITENDRAS940/hyper_render_prod.git'],
-      [
-        'play-store',
-        'https://play.google.com/store/apps/details?id=com.hitendras940.hyper',
-      ],
-      [
-        'app-store',
-        'https://apps.apple.com/us/app/hyper-book-sports-more/id6759787068',
-      ],
-    ],
-  },
-  {
-    name: 'Video Streaming Platform',
-    role: 'Event-driven / Microservices',
-    year: '2026',
-    description:
-      'A distributed video platform with separate catalog, upload, encoding, and playback services. Kafka coordinates asynchronous workflows while FFmpeg produces adaptive HLS streams stored on AWS S3.',
-    stack: 'Spring Boot, Kafka, PostgreSQL, AWS S3, FFmpeg',
-    links: [['github', 'https://github.com/HITENDRAS940/Netflix.git']],
-  },
-] as const;
-
-const skillGroups = [
-  ['languages', 'Java, Python, C++, SQL'],
-  ['backend', 'Spring Boot, Spring Security, JPA / Hibernate, REST APIs'],
-  ['systems', 'PostgreSQL, Apache Kafka, Microservices, FFmpeg'],
-  ['cloud', 'AWS, Docker, GitHub Actions, CI / CD'],
-] as const;
-
-const profiles = [
-  ['github', 'Code and projects', 'https://github.com/HITENDRAS940'],
-  [
-    'linkedin',
-    'Experience and network',
-    'https://www.linkedin.com/in/hitendra-singh-shaktawat-479758289/',
-  ],
-  ['leetcode', 'Problem solving', 'https://leetcode.com/u/hitendras940/'],
-  [
-    'geeksforgeeks',
-    'DSA practice',
-    'https://www.geeksforgeeks.org/user/hitendrij72/',
-  ],
-] as const;
 
 const sectionCommands = [
   'about',
@@ -125,6 +76,42 @@ const sectionMetadata: Record<
 function resolveCommand(value: string): string {
   const normalized = value.trim().toLowerCase();
   return aliases[normalized] ?? normalized;
+}
+
+function getAskQuestion(value: string): string | null {
+  const match = /^ask(?:\s+(.+))?$/i.exec(value.trim());
+  if (!match) return null;
+  return match[1]?.trim() ?? '';
+}
+
+function readAskAnswer(value: unknown): string | null {
+  if (!value || typeof value !== 'object' || !('answer' in value)) return null;
+  const answer = value.answer;
+  return typeof answer === 'string' ? answer : null;
+}
+
+async function fetchAskAnswer(question: string): Promise<string> {
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), 15_000);
+
+  try {
+    const response = await fetch('/api/ask', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question }),
+      signal: controller.signal,
+    });
+    const payload: unknown = await response.json().catch(() => null);
+    const answer = readAskAnswer(payload);
+
+    if (!response.ok || !answer) {
+      throw new Error('Unable to answer');
+    }
+
+    return answer;
+  } finally {
+    window.clearTimeout(timeout);
+  }
 }
 
 function ExternalLink({
@@ -214,10 +201,14 @@ function IntroOutput({
 function CommandOutput({
   command,
   onCommand,
+  askAnswer,
+  askStatus,
   prompt = command,
 }: {
   command: string;
-  onCommand: (command: string) => void;
+  onCommand: (command: string) => void | Promise<void>;
+  askAnswer?: string;
+  askStatus?: AskStatus;
   prompt?: string;
 }) {
   let content: ReactNode;
@@ -374,6 +365,20 @@ function CommandOutput({
         </>
       );
       break;
+    case 'ask':
+      content = (
+        <>
+          <h2>ask.ai</h2>
+          <p
+            className={
+              askStatus === 'thinking' ? 'ask-answer is-thinking' : 'ask-answer'
+            }
+          >
+            {askAnswer ?? 'Usage: ask <question>'}
+          </p>
+        </>
+      );
+      break;
     case 'help':
       content = (
         <>
@@ -385,9 +390,9 @@ function CommandOutput({
                 <button
                   type="button"
                   key={item}
-                  onClick={() => onCommand(item)}
+                  onClick={() => void onCommand(item)}
                 >
-                  <span>{item}</span>
+                  <span>{item === 'ask' ? 'ask <question>' : item}</span>
                   <small>{commandDescriptions[item]}</small>
                 </button>
               ))}
@@ -401,7 +406,7 @@ function CommandOutput({
           <strong>command not found: {command || '(empty)'}</strong>
           <span>
             Run{' '}
-            <button type="button" onClick={() => onCommand('help')}>
+            <button type="button" onClick={() => void onCommand('help')}>
               help
             </button>{' '}
             to list available commands.
@@ -425,7 +430,7 @@ function PortfolioSection({
 }: {
   command: SectionCommand;
   index: number;
-  onCommand: (command: string) => void;
+  onCommand: (command: string) => void | Promise<void>;
 }) {
   const metadata = sectionMetadata[command];
 
@@ -469,11 +474,20 @@ const commandDescriptions: Record<Command, string> = {
   resume: 'open the complete resume',
   socials: 'coding and professional profiles',
   contact: 'email, phone, and location',
+  ask: 'Ask AI about Hitendra',
   help: 'list available commands',
   clear: 'clear terminal output',
 };
 
-type HistoryEntry = { id: number; command: string };
+type AskStatus = 'usage' | 'thinking' | 'answered' | 'error';
+
+type HistoryEntry = {
+  id: number;
+  command: string;
+  prompt?: string;
+  askAnswer?: string;
+  askStatus?: AskStatus;
+};
 
 export default function TerminalPortfolio() {
   const [showWelcome, setShowWelcome] = useState(true);
@@ -483,6 +497,7 @@ export default function TerminalPortfolio() {
   const [introComplete, setIntroComplete] = useState(false);
   const [introLeaving, setIntroLeaving] = useState(false);
   const [activeGreetingIndex, setActiveGreetingIndex] = useState(0);
+  const [askPending, setAskPending] = useState(false);
   const historyIndex = useRef(-1);
   const id = useRef(2);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -583,19 +598,94 @@ export default function TerminalPortfolio() {
     return () => window.removeEventListener('hashchange', syncFromHash);
   }, []);
 
-  const runCommand = (
+  const updateEntry = (entryId: number, patch: Partial<HistoryEntry>) => {
+    setEntries((current) =>
+      current.map((entry) =>
+        entry.id === entryId ? { ...entry, ...patch } : entry,
+      ),
+    );
+  };
+
+  const runCommand = async (
     rawCommand: string,
     options?: { focusInput?: boolean },
   ) => {
     const trimmed = rawCommand.trim();
     if (!trimmed) return;
 
+    const askQuestion = getAskQuestion(trimmed);
     const command = resolveCommand(trimmed);
     setHistory((current) => [...current, trimmed]);
     historyIndex.current = -1;
     setValue('');
 
-    if (command === 'clear') {
+    if (askQuestion !== null) {
+      setShowWelcome(false);
+      window.history.replaceState(null, '', '#ask');
+
+      if (!askQuestion) {
+        setEntries((current) => [
+          ...current,
+          {
+            id: id.current++,
+            command: 'ask',
+            prompt: trimmed,
+            askAnswer: 'Usage: ask <question>',
+            askStatus: 'usage',
+          },
+        ]);
+      } else if (askQuestion.length > maxAskQuestionLength) {
+        setEntries((current) => [
+          ...current,
+          {
+            id: id.current++,
+            command: 'ask',
+            prompt: trimmed,
+            askAnswer: `Question is too long. Keep it under ${maxAskQuestionLength} characters.`,
+            askStatus: 'usage',
+          },
+        ]);
+      } else if (askPending) {
+        setEntries((current) => [
+          ...current,
+          {
+            id: id.current++,
+            command: 'ask',
+            prompt: trimmed,
+            askAnswer: 'Thinking already. Please wait for the current answer.',
+            askStatus: 'usage',
+          },
+        ]);
+      } else {
+        const entryId = id.current++;
+        setAskPending(true);
+        setEntries((current) => [
+          ...current,
+          {
+            id: entryId,
+            command: 'ask',
+            prompt: trimmed,
+            askAnswer: 'Thinking...',
+            askStatus: 'thinking',
+          },
+        ]);
+
+        try {
+          const answer = await fetchAskAnswer(askQuestion);
+          updateEntry(entryId, {
+            askAnswer: answer,
+            askStatus: 'answered',
+          });
+        } catch {
+          updateEntry(entryId, {
+            askAnswer: 'Unable to answer right now. Please try again.',
+            askStatus: 'error',
+          });
+        } finally {
+          setAskPending(false);
+        }
+      }
+    } else if (command === 'clear') {
       setEntries([]);
       setShowWelcome(false);
       window.history.replaceState(null, '', '#clear');
@@ -615,7 +705,7 @@ export default function TerminalPortfolio() {
 
   const submit = (event: SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
-    runCommand(value, { focusInput: true });
+    void runCommand(value, { focusInput: true });
   };
 
   const handleInputKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
@@ -648,7 +738,7 @@ export default function TerminalPortfolio() {
   };
 
   const runQuickCommand = (command: Command) => {
-    runCommand(command);
+    void runCommand(command);
   };
 
   return (
@@ -660,14 +750,14 @@ export default function TerminalPortfolio() {
               <button
                 className="window-control window-control--close"
                 type="button"
-                onClick={() => runCommand('clear')}
+                onClick={() => void runCommand('clear')}
                 title="Clear terminal"
                 aria-label="Clear terminal"
               />
               <button
                 className="window-control window-control--minimize"
                 type="button"
-                onClick={() => runCommand('home')}
+                onClick={() => void runCommand('home')}
                 title="Restore profile"
                 aria-label="Restore profile"
               />
@@ -713,6 +803,8 @@ export default function TerminalPortfolio() {
                     <CommandOutput
                       key={entry.id}
                       command={entry.command}
+                      askAnswer={entry.askAnswer}
+                      askStatus={entry.askStatus}
                       onCommand={runCommand}
                     />
                   ))}
@@ -744,6 +836,7 @@ export default function TerminalPortfolio() {
                     />
                     <button
                       type="submit"
+                      disabled={askPending}
                       title="Run command"
                       aria-label="Run command"
                     >
