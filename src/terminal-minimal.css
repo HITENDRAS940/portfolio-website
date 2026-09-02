@@ -237,8 +237,10 @@ a {
 }
 
 .window-control {
+  display: grid;
   width: 13px;
   height: 13px;
+  place-items: center;
   border-radius: 50%;
   padding: 0;
   cursor: pointer;
@@ -254,6 +256,16 @@ a {
 
 .window-control--fullscreen {
   background: var(--terminal-green);
+}
+
+.window-control svg {
+  opacity: 0;
+  transition: opacity var(--terminal-duration-short) ease;
+}
+
+.window-controls:hover .window-control svg,
+.window-control:focus-visible svg {
+  opacity: 1;
 }
 
 .window-control:hover,
@@ -535,6 +547,23 @@ a {
 
 .terminal-project:last-child {
   border-bottom: 1px solid var(--terminal-rule);
+}
+
+.projects-toggle {
+  border: 1px solid var(--terminal-rule-strong);
+  border-radius: var(--terminal-radius);
+  padding: 8px 10px;
+  background: transparent;
+  color: var(--terminal-green);
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--terminal-text-xs);
+}
+
+.projects-toggle:hover,
+.projects-toggle:focus-visible {
+  border-color: var(--terminal-green);
+  color: var(--terminal-text);
 }
 
 .project-heading {

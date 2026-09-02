@@ -1,4 +1,12 @@
-import { ArrowUp, ArrowUpRight, CornerDownLeft, FileText } from 'lucide-react';
+import {
+  ArrowUp,
+  ArrowUpRight,
+  CornerDownLeft,
+  FileText,
+  Maximize2,
+  Minus,
+  X,
+} from 'lucide-react';
 import {
   type KeyboardEvent,
   type ReactNode,
@@ -262,12 +270,16 @@ function CommandOutput({
   askAnswer,
   askStatus,
   prompt = command,
+  showAllProjects = true,
+  onToggleProjects,
 }: {
   command: string;
   onCommand: (command: string) => void | Promise<void>;
   askAnswer?: string;
   askStatus?: AskStatus;
   prompt?: string;
+  showAllProjects?: boolean;
+  onToggleProjects?: () => void;
 }) {
   let content: ReactNode;
 
@@ -306,27 +318,38 @@ function CommandOutput({
       content = (
         <>
           <h2>projects/</h2>
-          {projects.map((project, index) => (
-            <article className="terminal-project" key={project.name}>
-              <div className="project-heading">
-                <b>0{index + 1}</b>
-                <strong>{project.name}</strong>
-                <span>{project.year}</span>
-              </div>
-              <p className="project-role">{project.role}</p>
-              <p>{project.description}</p>
-              <p className="stack-line">
-                <span>stack:</span> {project.stack}
-              </p>
-              <div className="terminal-links">
-                {project.links.map(([label, href]) => (
-                  <ExternalLink href={href} key={label}>
-                    {label}
-                  </ExternalLink>
-                ))}
-              </div>
-            </article>
-          ))}
+          {(showAllProjects ? projects : projects.slice(0, 2)).map(
+            (project, index) => (
+              <article className="terminal-project" key={project.name}>
+                <div className="project-heading">
+                  <b>0{index + 1}</b>
+                  <strong>{project.name}</strong>
+                  <span>{project.year}</span>
+                </div>
+                <p className="project-role">{project.role}</p>
+                <p>{project.description}</p>
+                <p className="stack-line">
+                  <span>stack:</span> {project.stack}
+                </p>
+                <div className="terminal-links">
+                  {project.links.map(([label, href]) => (
+                    <ExternalLink href={href} key={label}>
+                      {label}
+                    </ExternalLink>
+                  ))}
+                </div>
+              </article>
+            ),
+          )}
+          {!showAllProjects && onToggleProjects ? (
+            <button
+              className="projects-toggle"
+              type="button"
+              onClick={onToggleProjects}
+            >
+              show all projects
+            </button>
+          ) : null}
         </>
       );
       break;
@@ -495,6 +518,7 @@ function PortfolioSection({
   onCommand: (command: string) => void | Promise<void>;
 }) {
   const metadata = sectionMetadata[command];
+  const [showAllProjects, setShowAllProjects] = useState(false);
 
   return (
     <section
@@ -521,6 +545,12 @@ function PortfolioSection({
           command={command}
           prompt={metadata.prompt}
           onCommand={onCommand}
+          showAllProjects={showAllProjects || command !== 'projects'}
+          onToggleProjects={
+            command === 'projects'
+              ? () => setShowAllProjects(true)
+              : undefined
+          }
         />
       </div>
     </section>
@@ -855,21 +885,27 @@ export default function TerminalPortfolio() {
                 onClick={() => void runCommand('clear')}
                 title="Clear terminal"
                 aria-label="Clear terminal"
-              />
+              >
+                <X size={11} strokeWidth={3} aria-hidden="true" />
+              </button>
               <button
                 className="window-control window-control--minimize"
                 type="button"
                 onClick={() => void runCommand('home')}
                 title="Restore profile"
                 aria-label="Restore profile"
-              />
+              >
+                <Minus size={11} strokeWidth={3} aria-hidden="true" />
+              </button>
               <button
                 className="window-control window-control--fullscreen"
                 type="button"
                 onClick={toggleFullscreen}
                 title="Toggle fullscreen"
                 aria-label="Toggle fullscreen"
-              />
+              >
+                <Maximize2 size={10} strokeWidth={3} aria-hidden="true" />
+              </button>
             </div>
             <a
               className="terminal-title"
