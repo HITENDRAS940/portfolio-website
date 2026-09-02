@@ -79,7 +79,7 @@ const profiles = [
   { label: "GeeksforGeeks", detail: "DSA practice", href: "https://www.geeksforgeeks.org/user/hitendrij72/" },
 ];
 
-const introWords = ["Hello.", "Products.", "Backends.", "Systems.", "Hitendra."];
+const introWords = ["Hello.", "नमस्ते.", "Hola.", "Bonjour.", "こんにちは.", "Ciao"];
 
 function IntroSequence({ onComplete }: { onComplete: () => void }) {
   return (
@@ -268,7 +268,7 @@ export default function Home() {
 
         <header className="hero-nav">
           <a className="wordmark" href="#home" aria-label="Hitendra Singh Shaktawat home">
-            HS<span>/26</span>
+            HSS<span>/26</span>
           </a>
 
           <nav className="desktop-nav" aria-label="Main navigation">
@@ -318,14 +318,13 @@ export default function Home() {
           </p>
           <p className="hero-enter hero-meta-right" style={{ "--delay": "360ms" } as React.CSSProperties}>
             Udaipur, India<br />
-            Working worldwide
           </p>
         </div>
 
         <div className="hero-title" aria-label="Hitendra Singh Shaktawat, software engineer">
           <div className="title-line title-line-one"><span>Hitendra</span></div>
           <div className="title-line title-line-two"><span>Singh Shaktawat</span></div>
-          <div className="title-line title-line-three"><span>Software Engineer</span></div>
+          <div className="title-line title-line-three"><span>Backend Developer</span></div>
         </div>
 
         <div className="hero-footer">
@@ -374,7 +373,6 @@ export default function Home() {
           </div>
         </div>
         <div className="about-stats" data-reveal>
-          <div><strong>8.43</strong><span>VIT CGPA</span></div>
           <div><strong>150+</strong><span>DSA problems solved</span></div>
           <div><strong>02</strong><span>Production projects</span></div>
         </div>
