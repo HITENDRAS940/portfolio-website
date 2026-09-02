@@ -773,7 +773,7 @@ a {
   outline: 0;
   background: transparent;
   caret-color: var(--terminal-green);
-  font-size: 14px;
+  font-size: var(--terminal-text-sm);
 }
 
 .prompt-input-row input::placeholder {
