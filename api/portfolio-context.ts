@@ -36,6 +36,14 @@ Education:
 - B.Tech in Computer Science and Engineering
 - 2023 - 2027
 - CGPA: 8.43 / 10 as of July 2026
+- The Scholars’ Arena English Medium Secondary School, Udaipur, India
+- CBSE Class XII (PCM)
+- 2022
+- Percentage: 90.4% (Maximum marks: 500)
+- The Scholars’ Arena English Medium Secondary School, Udaipur, India
+- CBSE Class X
+- 2020
+- Percentage: 83.0% (Maximum marks: 500)
 
 Skills:
 ${skillsContext}
