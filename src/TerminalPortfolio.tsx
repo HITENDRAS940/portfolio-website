@@ -476,16 +476,8 @@ const commandDescriptions: Record<Command, string> = {
 type HistoryEntry = { id: number; command: string };
 
 export default function TerminalPortfolio() {
-  const initialHash = resolveCommand(window.location.hash.slice(1));
-  const initialCommand = commands.includes(initialHash as Command)
-    ? (initialHash as Command)
-    : 'home';
-  const [showWelcome, setShowWelcome] = useState(initialCommand === 'home');
-  const [entries, setEntries] = useState<HistoryEntry[]>(
-    initialCommand !== 'home' && initialCommand !== 'clear'
-      ? [{ id: 1, command: initialCommand }]
-      : [],
-  );
+  const [showWelcome, setShowWelcome] = useState(true);
+  const [entries, setEntries] = useState<HistoryEntry[]>([]);
   const [value, setValue] = useState('');
   const [history, setHistory] = useState<string[]>([]);
   const [introComplete, setIntroComplete] = useState(false);
@@ -495,6 +487,37 @@ export default function TerminalPortfolio() {
   const id = useRef(2);
   const inputRef = useRef<HTMLInputElement>(null);
   const transcriptRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    window.history.replaceState(null, '', window.location.pathname);
+
+    try {
+      window.localStorage.clear();
+      window.sessionStorage.clear();
+    } catch {
+      // Storage may be unavailable in strict private browsing modes.
+    }
+
+    if ('caches' in window) {
+      void window.caches
+        .keys()
+        .then((keys) =>
+          Promise.all(keys.map((key) => window.caches.delete(key))),
+        )
+        .catch(() => undefined);
+    }
+
+    if ('serviceWorker' in navigator) {
+      void navigator.serviceWorker
+        .getRegistrations()
+        .then((registrations) =>
+          Promise.all(
+            registrations.map((registration) => registration.unregister()),
+          ),
+        )
+        .catch(() => undefined);
+    }
+  }, []);
 
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia(
@@ -540,11 +563,6 @@ export default function TerminalPortfolio() {
   }, [entries, showWelcome]);
 
   useEffect(() => {
-    if (!introComplete) return;
-    window.requestAnimationFrame(() => inputRef.current?.focus());
-  }, [introComplete]);
-
-  useEffect(() => {
     const syncFromHash = () => {
       const command = resolveCommand(window.location.hash.slice(1));
       if (!commands.includes(command as Command)) return;
@@ -565,7 +583,10 @@ export default function TerminalPortfolio() {
     return () => window.removeEventListener('hashchange', syncFromHash);
   }, []);
 
-  const runCommand = (rawCommand: string) => {
+  const runCommand = (
+    rawCommand: string,
+    options?: { focusInput?: boolean },
+  ) => {
     const trimmed = rawCommand.trim();
     if (!trimmed) return;
 
@@ -587,12 +608,14 @@ export default function TerminalPortfolio() {
       window.history.replaceState(null, '', `#${command}`);
     }
 
-    window.requestAnimationFrame(() => inputRef.current?.focus());
+    if (options?.focusInput) {
+      window.requestAnimationFrame(() => inputRef.current?.focus());
+    }
   };
 
   const submit = (event: SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
-    runCommand(value);
+    runCommand(value, { focusInput: true });
   };
 
   const handleInputKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
