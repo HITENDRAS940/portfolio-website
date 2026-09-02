@@ -862,8 +862,15 @@ a {
     padding: 0 var(--terminal-space-md);
   }
   .terminal-transcript {
-    padding: var(--terminal-space-md) var(--terminal-space-md)
-      var(--terminal-space-xl);
+    padding: 22px 18px 30px;
+  }
+  .terminal-output {
+    font-size: 13px;
+    line-height: 1.78;
+  }
+  .terminal-echo {
+    margin-bottom: 18px;
+    font-size: 13px;
   }
   .terminal-intro__stack {
     min-height: 72px;
@@ -886,20 +893,49 @@ a {
     min-height: 40px;
   }
   .identity-status {
-    align-items: flex-start;
-    font-size: 9px;
+    display: grid;
+    justify-content: start;
+    gap: 10px;
+    font-size: 10px;
   }
   .identity-status span:first-child {
-    max-width: 54%;
+    max-width: 100%;
+  }
+  .identity-status span:last-child {
+    white-space: normal;
   }
   .welcome-output h1 {
-    font-size: 26px;
+    margin: 30px 0 16px;
+    font-size: clamp(29px, 9vw, 36px);
+    line-height: 1.16;
+    overflow-wrap: anywhere;
   }
   .welcome-output h1 span {
     display: block;
   }
   .welcome-output h1 span + span::before {
     content: none;
+  }
+  .welcome-role {
+    margin-bottom: 20px;
+    color: var(--terminal-text-soft);
+  }
+  .welcome-copy {
+    line-height: 1.86;
+  }
+  .welcome-hint {
+    display: grid;
+    gap: 6px;
+    margin-top: 26px;
+    border-inline-start: 1px solid var(--terminal-rule-strong);
+    padding-inline-start: 12px;
+  }
+  .welcome-hint code {
+    display: inline;
+    border: 0;
+    padding: 0;
+    background: transparent;
+    color: var(--terminal-text);
   }
 }
 
@@ -915,6 +951,18 @@ a {
   }
   .portfolio-section__header {
     grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+  .terminal-transcript {
+    padding-inline: 16px;
+  }
+  .terminal-output {
+    font-size: 12.5px;
+  }
+  .terminal-echo {
+    font-size: 12.5px;
+  }
+  .welcome-output h1 {
+    font-size: clamp(27px, 9vw, 34px);
   }
 }
 

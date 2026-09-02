@@ -178,9 +178,11 @@ function WelcomeOutput() {
         systems that hold up beyond the demo.
       </p>
       <p className="welcome-hint">
-        <span>ask mode:</span> type <code>ask &lt;question&gt;</code> to know
-        something about me, like{' '}
-        <code>ask what backend projects has Hitendra built?</code>
+        <span>ask mode:</span>{' '}
+        <span>
+          use <code>ask &lt;question&gt;</code> to know something about my
+          projects, skills, resume, or links.
+        </span>
       </p>
     </section>
   );
@@ -485,7 +487,7 @@ function PortfolioSection({
 const commandDescriptions: Record<Command, string> = {
   home: 'restore the identity screen',
   about: 'profile and engineering focus',
-  projects: 'selected production work',
+  projects: 'all public GitHub projects',
   skills: 'languages, systems, and tools',
   education: 'degree and current academic record',
   resume: 'open the complete resume',

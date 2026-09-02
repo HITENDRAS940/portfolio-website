@@ -2,7 +2,7 @@ import { portfolioContext } from './portfolio-context.js';
 
 const GEMINI_MODEL = 'gemini-3.1-flash-lite';
 const MAX_QUESTION_LENGTH = 500;
-const MAX_ANSWER_LENGTH = 900;
+const MAX_ANSWER_LENGTH = 3_000;
 const REQUEST_TIMEOUT_MS = 12_000;
 
 const systemInstruction = `
@@ -143,7 +143,7 @@ export default async function handler(
             },
           ],
           generationConfig: {
-            maxOutputTokens: 180,
+            maxOutputTokens: 700,
             temperature: 0.2,
             topP: 0.8,
           },

@@ -1,3 +1,29 @@
+import { profiles, projects, skillGroups } from '../src/portfolio-data.js';
+
+const projectContext = projects
+  .map((project) => {
+    const links = project.links
+      .map(([label, href]) => `${label}: ${href}`)
+      .join('; ');
+
+    return [
+      `- ${project.name} (${project.year})`,
+      `Role: ${project.role}`,
+      `Description: ${project.description}`,
+      `Stack: ${project.stack}`,
+      `Links: ${links}`,
+    ].join('. ');
+  })
+  .join('\n');
+
+const skillsContext = skillGroups
+  .map(([group, value]) => `- ${group}: ${value}`)
+  .join('\n');
+
+const profilesContext = profiles
+  .map(([label, detail, href]) => `- ${label}: ${detail}. ${href}`)
+  .join('\n');
+
 export const portfolioContext = `
 Name: Hitendra Singh Shaktawat
 Location: Udaipur, India
@@ -12,20 +38,14 @@ Education:
 - CGPA: 8.43 / 10 as of July 2026
 
 Skills:
-- Languages: Java, Python, C++, SQL
-- Backend: Spring Boot, Spring Security, JPA / Hibernate, REST APIs
-- Systems and data: PostgreSQL, Apache Kafka, Microservices, FFmpeg
-- Cloud and DevOps: AWS, Docker, GitHub Actions, CI / CD
+${skillsContext}
 
-Projects:
-- Hyper (2025): Sports booking / Mobile. A production sports-booking application published on Google Play and the App Store, with concurrency-safe slot booking, Razorpay payments, dynamic pricing, settlements, and failure-safe booking states. Stack: Expo, Spring Boot, PostgreSQL, Docker. GitHub: https://github.com/HITENDRAS940/hyper_render_prod.git. Play Store: https://play.google.com/store/apps/details?id=com.hitendras940.hyper. App Store: https://apps.apple.com/us/app/hyper-book-sports-more/id6759787068.
-- Video Streaming Platform (2026): Event-driven / Microservices. A distributed video platform with separate catalog, upload, encoding, and playback services. Kafka coordinates asynchronous workflows while FFmpeg produces adaptive HLS streams stored on AWS S3. Stack: Spring Boot, Kafka, PostgreSQL, AWS S3, FFmpeg. GitHub: https://github.com/HITENDRAS940/Netflix.git.
+Projects and GitHub repositories:
+The following project list comes from Hitendra's public GitHub repositories and portfolio data. Some small learning or practice repositories have limited public metadata, so describe those conservatively.
+${projectContext}
 
 Public profiles:
-- GitHub: https://github.com/HITENDRAS940
-- LinkedIn: https://www.linkedin.com/in/hitendra-singh-shaktawat-479758289/
-- LeetCode: https://leetcode.com/u/hitendras940/
-- GeeksforGeeks: https://www.geeksforgeeks.org/user/hitendrij72/
+${profilesContext}
 
 Contact:
 - Email: hitendras940@gmail.com
