@@ -7,7 +7,10 @@ export const projects = [
       'A production sports-booking application published on Google Play and the App Store, with concurrency-safe slot booking, Razorpay payments, dynamic pricing, settlements, and failure-safe booking states.',
     stack: 'Expo, Spring Boot, PostgreSQL, Docker',
     links: [
-      ['github', 'https://github.com/HITENDRAS940/hyper_render_prod.git'],
+      [
+        'github',
+        'https://github.com/HITENDRAS940/hyper_render_prod.git'
+      ],
       [
         'play-store',
         'https://play.google.com/store/apps/details?id=com.hitendras940.hyper',

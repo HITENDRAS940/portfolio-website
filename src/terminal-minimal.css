@@ -789,6 +789,14 @@ a {
   white-space: nowrap;
 }
 
+.quick-commands .quick-command--ask {
+  border-color: color-mix(in srgb, var(--terminal-green) 68%, var(--terminal-rule));
+  background: color-mix(in srgb, var(--terminal-green) 10%, transparent);
+  color: var(--terminal-green);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--terminal-green) 18%, transparent);
+  font-weight: 700;
+}
+
 .quick-commands button::before {
   margin-right: var(--terminal-space-2xs);
   color: var(--terminal-text-dim);

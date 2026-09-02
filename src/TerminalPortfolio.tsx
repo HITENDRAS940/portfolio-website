@@ -11,6 +11,7 @@ import { profiles, projects, skillGroups } from './portfolio-data';
 
 const commands = [
   'home',
+  'ask',
   'about',
   'projects',
   'skills',
@@ -18,7 +19,6 @@ const commands = [
   'resume',
   'socials',
   'contact',
-  'ask',
   'help',
   'clear',
 ] as const;
@@ -710,9 +710,14 @@ export default function TerminalPortfolio() {
     const trimmed = rawCommand.trim();
     if (!trimmed) return;
 
-    const askQuestion = getAskQuestion(trimmed);
-    const command = resolveCommand(trimmed);
-    setHistory((current) => [...current, trimmed]);
+    const resolvedCommand = resolveCommand(trimmed);
+    const isKnownCommand = commands.includes(resolvedCommand as Command);
+    const isAskCommand = getAskQuestion(trimmed) !== null;
+    const normalizedCommand =
+      isKnownCommand || isAskCommand ? trimmed : `ask ${trimmed}`;
+    const askQuestion = getAskQuestion(normalizedCommand);
+    const command = resolveCommand(normalizedCommand);
+    setHistory((current) => [...current, normalizedCommand]);
     historyIndex.current = -1;
     setValue('');
 
@@ -926,7 +931,7 @@ export default function TerminalPortfolio() {
                       value={value}
                       onChange={(event) => setValue(event.target.value)}
                       onKeyDown={handleInputKeyDown}
-                      placeholder="enter command..."
+                      placeholder="enter command or ask <question>...."
                       autoComplete="off"
                       autoCapitalize="none"
                       spellCheck={false}
@@ -943,6 +948,9 @@ export default function TerminalPortfolio() {
                   <nav className="quick-commands" aria-label="Quick commands">
                     {commands.map((command) => (
                       <button
+                        className={
+                          command === 'ask' ? 'quick-command--ask' : undefined
+                        }
                         type="button"
                         key={command}
                         onClick={() => runQuickCommand(command)}
