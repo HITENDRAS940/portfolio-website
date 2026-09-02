@@ -436,6 +436,31 @@ a {
   margin: 0;
 }
 
+.welcome-hint {
+  display: flex;
+  max-width: 850px;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--terminal-space-xs);
+  margin: var(--terminal-space-lg) 0 0;
+  color: var(--terminal-text-dim);
+}
+
+.welcome-hint span {
+  color: var(--terminal-green);
+}
+
+.welcome-hint code {
+  min-width: 0;
+  border: 1px solid var(--terminal-rule);
+  border-radius: var(--terminal-radius);
+  padding: 3px 7px;
+  background: color-mix(in srgb, var(--terminal-panel-raised) 84%, transparent);
+  color: var(--terminal-text);
+  font: inherit;
+  overflow-wrap: anywhere;
+}
+
 .terminal-output h2 {
   margin: 0 0 var(--terminal-space-md);
   color: var(--terminal-text);

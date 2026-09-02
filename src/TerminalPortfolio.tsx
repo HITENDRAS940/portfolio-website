@@ -176,6 +176,10 @@ function WelcomeOutput() {
         I build transaction-safe APIs, event-driven services, and production
         systems that hold up beyond the demo.
       </p>
+      <p className="welcome-hint">
+        <span>hint:</span> try{' '}
+        <code>ask what backend projects has Hitendra built?</code>
+      </p>
     </section>
   );
 }
