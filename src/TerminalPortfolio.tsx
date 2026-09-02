@@ -97,6 +97,51 @@ function readAskError(value: unknown): string | null {
   return typeof error === 'string' ? error : null;
 }
 
+function isSafeAskLink(value: string): boolean {
+  return /^(?:https?:\/\/|mailto:)/i.test(value);
+}
+
+function renderAskAnswer(answer: string): ReactNode[] {
+  const tokens = /\*\*([^*\n]+)\*\*|\[([^\]\n]+)\]\(((?:https?:\/\/|mailto:)[^\s)]+)\)|(https?:\/\/[^\s<]+)/gi;
+  const rendered: ReactNode[] = [];
+  let lastIndex = 0;
+
+  for (const match of answer.matchAll(tokens)) {
+    const index = match.index ?? 0;
+    if (index > lastIndex) rendered.push(answer.slice(lastIndex, index));
+
+    if (match[1]) {
+      rendered.push(<strong key={index}>{match[1]}</strong>);
+    } else {
+      const label = match[2] ?? match[4];
+      const href = match[3] ?? match[4];
+      const trailing = href?.match(/[),.!?;:]+$/)?.[0] ?? '';
+      const linkHref = href?.slice(0, href.length - trailing.length) ?? '';
+
+      if (label && isSafeAskLink(linkHref)) {
+        rendered.push(
+          <a
+            key={index}
+            href={linkHref}
+            target="_blank"
+            rel="noreferrer"
+          >
+            {label}
+          </a>,
+        );
+        if (trailing) rendered.push(trailing);
+      } else {
+        rendered.push(match[0]);
+      }
+    }
+
+    lastIndex = index + match[0].length;
+  }
+
+  if (lastIndex < answer.length) rendered.push(answer.slice(lastIndex));
+  return rendered;
+}
+
 async function fetchAskAnswer(question: string): Promise<string> {
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), 15_000);
@@ -389,7 +434,9 @@ function CommandOutput({
                 : 'ask-answer'
             }
           >
-            {askAnswer ?? 'Usage: ask <question>'}
+            {askAnswer
+              ? renderAskAnswer(askAnswer)
+              : 'Usage: ask <question>'}
           </p>
         </>
       );

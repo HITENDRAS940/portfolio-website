@@ -678,6 +678,23 @@ a {
   white-space: pre-wrap;
 }
 
+.ask-answer strong {
+  color: var(--terminal-text);
+  font-weight: 600;
+}
+
+.ask-answer a {
+  color: var(--terminal-blue);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--terminal-blue) 55%, transparent);
+  text-underline-offset: 3px;
+}
+
+.ask-answer a:hover,
+.ask-answer a:focus-visible {
+  color: var(--terminal-green);
+}
+
 .ask-answer.is-thinking {
   color: var(--terminal-text-dim);
 }
