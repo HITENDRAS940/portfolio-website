@@ -1,4 +1,4 @@
-import { portfolioContext } from '../src/portfolio-data';
+import { portfolioContext } from './portfolio-context.js';
 
 const GEMINI_MODEL = 'gemini-3.1-flash-lite';
 const MAX_QUESTION_LENGTH = 500;
