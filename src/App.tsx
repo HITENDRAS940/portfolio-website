@@ -79,6 +79,30 @@ const profiles = [
   { label: "GeeksforGeeks", detail: "DSA practice", href: "https://www.geeksforgeeks.org/user/hitendrij72/" },
 ];
 
+const introWords = ["Hello.", "Products.", "Backends.", "Systems.", "Hitendra."];
+
+function IntroSequence({ onComplete }: { onComplete: () => void }) {
+  return (
+    <output className="intro-sequence" aria-label="Welcome to Hitendra's portfolio">
+      <div className="intro-sequence__words" aria-hidden="true">
+        {introWords.map((word, index) => (
+          <span
+            className={index === introWords.length - 1 ? "intro-sequence__word intro-sequence__word--signature" : "intro-sequence__word"}
+            key={word}
+            style={{ "--intro-index": index } as React.CSSProperties}
+          >
+            {word}
+          </span>
+        ))}
+      </div>
+      <span className="intro-sequence__progress" aria-hidden="true" />
+      <button className="intro-sequence__skip" type="button" onClick={onComplete}>
+        Skip intro
+      </button>
+    </output>
+  );
+}
+
 function FlowField() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -191,6 +215,30 @@ function FlowField() {
 
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [introVisible, setIntroVisible] = useState(() => {
+    const isDirectSectionVisit = window.location.hash && window.location.hash !== "#home";
+    return !isDirectSectionVisit && !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  });
+
+  useEffect(() => {
+    if (!introVisible) return;
+
+    const previousOverflow = document.body.style.overflow;
+    const finishIntro = () => setIntroVisible(false);
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") finishIntro();
+    };
+    const timeoutId = window.setTimeout(finishIntro, 2250);
+
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      window.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [introVisible]);
 
   useEffect(() => {
     const nodes = document.querySelectorAll<HTMLElement>("[data-reveal]");
@@ -211,7 +259,9 @@ export default function Home() {
   }, []);
 
   return (
-    <main>
+    <>
+      {introVisible ? <IntroSequence onComplete={() => setIntroVisible(false)} /> : null}
+      <main className={introVisible ? "site intro-running" : "site"} inert={introVisible}>
       <section className="hero" id="home">
         <FlowField />
         <div className="hero-grain" aria-hidden="true" />
@@ -450,6 +500,7 @@ export default function Home() {
           <a href="#home">Back to top <ArrowUpRight size={15} /></a>
         </div>
       </section>
-    </main>
+      </main>
+    </>
   );
 }
