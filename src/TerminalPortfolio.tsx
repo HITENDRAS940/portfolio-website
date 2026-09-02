@@ -90,6 +90,12 @@ function readAskAnswer(value: unknown): string | null {
   return typeof answer === 'string' ? answer : null;
 }
 
+function readAskError(value: unknown): string | null {
+  if (!value || typeof value !== 'object' || !('error' in value)) return null;
+  const error = value.error;
+  return typeof error === 'string' ? error : null;
+}
+
 async function fetchAskAnswer(question: string): Promise<string> {
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), 15_000);
@@ -105,7 +111,10 @@ async function fetchAskAnswer(question: string): Promise<string> {
     const answer = readAskAnswer(payload);
 
     if (!response.ok || !answer) {
-      throw new Error('Unable to answer');
+      throw new Error(
+        readAskError(payload) ??
+          'Unable to answer right now. Please try again.',
+      );
     }
 
     return answer;
@@ -676,9 +685,12 @@ export default function TerminalPortfolio() {
             askAnswer: answer,
             askStatus: 'answered',
           });
-        } catch {
+        } catch (error) {
           updateEntry(entryId, {
-            askAnswer: 'Unable to answer right now. Please try again.',
+            askAnswer:
+              error instanceof Error
+                ? error.message
+                : 'Unable to answer right now. Please try again.',
             askStatus: 'error',
           });
         } finally {

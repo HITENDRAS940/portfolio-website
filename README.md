@@ -14,7 +14,7 @@ Gemini key:
 
 ```bash
 cp .env.example .env.local
-vercel dev
+npm run dev:vercel
 ```
 
 ## Production build
@@ -31,6 +31,11 @@ npm run preview
 3. Add `GEMINI_API_KEY` under the Vercel project's Environment Variables.
 4. Deploy. The build command and output directory are already configured in `vercel.json`.
 5. Add the custom domain under the Vercel project's Domains settings, then copy Vercel's DNS records into the Hostinger DNS editor.
+
+After adding or changing `GEMINI_API_KEY`, redeploy the project. Existing
+deployments do not automatically receive newly added environment variables.
+If you are testing a Preview deployment, add the variable to Preview as well
+as Production.
 
 The portfolio AI command uses `ask <question>` and calls `/api/ask` from the
 frontend. The Gemini key is read only inside the Vercel serverless function.
