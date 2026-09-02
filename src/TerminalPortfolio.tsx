@@ -35,6 +35,7 @@ const greetings = [
 ] as const;
 
 const maxAskQuestionLength = 500;
+const askWordDelay = 34;
 
 const aliases: Record<string, Command> = {
   whoami: 'about',
@@ -177,7 +178,8 @@ function WelcomeOutput() {
         systems that hold up beyond the demo.
       </p>
       <p className="welcome-hint">
-        <span>hint:</span> try{' '}
+        <span>ask mode:</span> type <code>ask &lt;question&gt;</code> to know
+        something about me, like{' '}
         <code>ask what backend projects has Hitendra built?</code>
       </p>
     </section>
@@ -384,7 +386,9 @@ function CommandOutput({
           <h2>ask.ai</h2>
           <p
             className={
-              askStatus === 'thinking' ? 'ask-answer is-thinking' : 'ask-answer'
+              askStatus === 'thinking' || askStatus === 'streaming'
+                ? 'ask-answer is-thinking'
+                : 'ask-answer'
             }
           >
             {askAnswer ?? 'Usage: ask <question>'}
@@ -492,7 +496,7 @@ const commandDescriptions: Record<Command, string> = {
   clear: 'clear terminal output',
 };
 
-type AskStatus = 'usage' | 'thinking' | 'answered' | 'error';
+type AskStatus = 'usage' | 'thinking' | 'streaming' | 'answered' | 'error';
 
 type HistoryEntry = {
   id: number;
@@ -619,6 +623,41 @@ export default function TerminalPortfolio() {
     );
   };
 
+  const streamAskAnswer = async (entryId: number, answer: string) => {
+    const prefersReducedMotion = window.matchMedia(
+      '(prefers-reduced-motion: reduce)',
+    ).matches;
+
+    if (prefersReducedMotion) {
+      updateEntry(entryId, {
+        askAnswer: answer,
+        askStatus: 'answered',
+      });
+      return;
+    }
+
+    const words = answer.split(/(\s+)/);
+    let rendered = '';
+
+    updateEntry(entryId, {
+      askAnswer: '',
+      askStatus: 'streaming',
+    });
+
+    for (const word of words) {
+      rendered += word;
+      updateEntry(entryId, { askAnswer: rendered });
+
+      if (word.trim()) {
+        await new Promise((resolve) =>
+          window.setTimeout(resolve, askWordDelay),
+        );
+      }
+    }
+
+    updateEntry(entryId, { askStatus: 'answered' });
+  };
+
   const runCommand = async (
     rawCommand: string,
     options?: { focusInput?: boolean },
@@ -685,10 +724,7 @@ export default function TerminalPortfolio() {
 
         try {
           const answer = await fetchAskAnswer(askQuestion);
-          updateEntry(entryId, {
-            askAnswer: answer,
-            askStatus: 'answered',
-          });
+          await streamAskAnswer(entryId, answer);
         } catch (error) {
           updateEntry(entryId, {
             askAnswer:
