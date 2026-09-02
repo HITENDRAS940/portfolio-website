@@ -173,10 +173,6 @@ function WelcomeOutput() {
       <p className="welcome-role">
         Java-first backend engineer based in Udaipur, India.
       </p>
-      <p className="welcome-copy">
-        I build transaction-safe APIs, event-driven services, and production
-        systems that hold up beyond the demo.
-      </p>
       <p className="welcome-hint">
         <span>ask mode:</span>{' '}
         <span>
